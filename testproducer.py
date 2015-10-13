@@ -13,8 +13,12 @@ def test1(producer):
     ]
     result = check_output(command)
     obj = json.loads(result)
-    if obj[u'@type'] != u'Create':
-        raise Exception("consumer object without correct type")
+    if isinstance(obj[u'@type'], unicode):
+        if obj[u'@type'] != u'Create':
+            raise Exception("consumer object without correct type")
+    elif isinstance(obj[u'@type'], list):
+        if u'Create' not in obj[u'@type']:
+            raise Exception("consumer object without correct type")
 
 if len(sys.argv) != 2:
     print "USAGE: testproducer.py <consumer>"
