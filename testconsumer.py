@@ -5,20 +5,30 @@ import os
 from subprocess import Popen, PIPE
 from StringIO import StringIO
 
-def test1(consumer):
-    activity = """
-                {
-                  "@context": "http://www.w3.org/ns/activitystreams",
-                  "@type": "Create",
-                  "actor": "http://www.test.example/martin",
-                  "object": "http://example.org/foo.jpg"
-                }
-                """
-    p = Popen([consumer, "--type"], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    result, err = p.communicate(activity)
+activity1 = """
+            {
+              "@context": "http://www.w3.org/ns/activitystreams",
+              "@type": "Create",
+              "actor": "http://www.test.example/martin",
+              "object": "http://example.org/foo.jpg"
+            }
+            """
+
+def run_test(consumer, data, arg, expected):
+    p = Popen([consumer, arg], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    result, err = p.communicate(data)
     result = result.strip()
-    if result != "Create":
-        raise Exception("consumer returned '%s' instead of correct type '%s' for test1" % (result, "Create"))
+    if result != expected:
+        raise Exception("consumer returned '%s' instead of '%s'" % (result, expected))
+
+def test1(consumer):
+    run_test(consumer, activity1, "--type", "Create")
+
+def test2(consumer):
+    run_test(consumer, activity1, "--actor-id", "http://www.test.example/martin")
+
+def test3(consumer):
+    run_test(consumer, activity1, "--object-id", "http://example.org/foo.jpg")
 
 if len(sys.argv) != 2:
     print "USAGE: testconsumer.py <consumer>"
@@ -27,3 +37,5 @@ if len(sys.argv) != 2:
 consumer = sys.argv[1]
 
 test1(consumer)
+test2(consumer)
+test3(consumer)
