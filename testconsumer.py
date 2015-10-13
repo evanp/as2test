@@ -18,11 +18,15 @@ def run_test(consumer, data, arg, expected):
     p = Popen([consumer, arg], stdin=PIPE, stdout=PIPE, stderr=PIPE)
     result, err = p.communicate(data)
     result = result.strip()
-    if result != expected:
-        raise Exception("consumer returned '%s' instead of '%s'" % (result, expected))
+    if isinstance(expected, str):
+        if result != expected:
+            raise Exception("consumer returned '%s' instead of '%s'" % (result, expected))
+    elif isinstance(expected, list):
+        if result not in expected:
+            raise Exception("consumer returned '%s' not in '%s'" % (result, expected.join(',')))
 
 def test1(consumer):
-    run_test(consumer, activity1, "--type", "Create")
+    run_test(consumer, activity1, "--type", ["Create", "http://www.w3.org/ns/activitystreams#Create"])
 
 def test2(consumer):
     run_test(consumer, activity1, "--actor-id", "http://www.test.example/martin")
